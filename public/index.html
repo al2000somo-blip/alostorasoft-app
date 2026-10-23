@@ -1,26 +1,458 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alostorasoft</title>
-    <link rel="stylesheet" href="/style.css" />
-  </head>
-  <body>
-    <main class="container">
-      <div class="card">
-        <span class="badge">Project Ready</span>
-        <h1>مرحباً بك في Alostorasoft</h1>
-        <p>
-          هذا هو الإعداد الأولي للمشروع. يمكنك الآن البدء في تطوير الصفحات والخدمات
-          والميزات الإضافية.
-        </p>
-        <div class="status">
-          <span class="dot"></span>
-          الخادم يعمل بشكل صحيح
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأسطورة سوفت - للصيانة وبرمجيات الهواتف (أوباري)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Cairo -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0b0f19;
+            color: #f1f5f9;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- Custom Notification Box (Replacing alert) -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-slate-900 border border-amber-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl shadow-amber-500/10 transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-3">
+        <div id="toastIcon" class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-info"></i>
         </div>
-        <a href="/api/health" class="button">فحص الحالة</a>
-      </div>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-amber-400">تنبيه</h4>
+            <p id="toastMsg" class="text-xs text-slate-300">رسالة توضيحية هنا...</p>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-300 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-bolt text-slate-950 text-xl font-black"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-black text-white tracking-wide">الأسطورة سوفت</h1>
+                    <p class="text-[11px] text-amber-400 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-location-dot text-[10px]"></i> أوباري، ليبيا
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 me-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                    مفتوح الآن
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-md mx-auto w-full px-4 py-5 flex-1 space-y-6">
+
+        <!-- Navigation Tabs -->
+        <div class="grid grid-cols-4 gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+            <button onclick="switchTab('track')" id="btn-track" class="py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                <span>متابعة الجهاز</span>
+            </button>
+            <button onclick="switchTab('services')" id="btn-services" class="py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-screwdriver-wrench text-sm"></i>
+                <span>السوفت والهارد</span>
+            </button>
+            <button onclick="switchTab('activations')" id="btn-activations" class="py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-microchip text-sm"></i>
+                <span>التفعيلات</span>
+            </button>
+            <button onclick="switchTab('contact')" id="btn-contact" class="py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-headset text-sm"></i>
+                <span>اتصل بنا</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: Track Device Status -->
+        <div id="tab-track" class="space-y-4">
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700/60 rounded-3xl p-5 shadow-2xl relative overflow-hidden">
+                <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">استعلام عن حالة جهازك</h3>
+                        <p class="text-[11px] text-slate-400">أدخل رقم الهاتف المسجل لدينا لمعرفة حالة الصيانة</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <div class="relative">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <input type="tel" id="phoneNumberInput" placeholder="أدخل رقم الهاتف (مثال: 092xxxxxxx)" class="w-full bg-slate-950 border border-slate-700/80 rounded-2xl pr-11 pl-4 py-3.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition">
+                    </div>
+                    <button onclick="searchDeviceStatus()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black py-3.5 rounded-2xl shadow-lg shadow-amber-500/20 hover:from-amber-400 hover:to-yellow-300 transition flex items-center justify-center gap-2 text-xs">
+                        <i class="fa-solid fa-search"></i>
+                        بحث عن حالة الجهاز
+                    </button>
+                </div>
+
+                <!-- Search Result Container -->
+                <div id="searchResult" class="hidden mt-4 pt-4 border-t border-slate-800 space-y-3 animate-fadeIn">
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">اسم العميل:</span>
+                            <span id="resName" class="text-xs font-bold text-white">محمد أحمد</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">نوع الجهاز:</span>
+                            <span id="resDevice" class="text-xs font-bold text-amber-400">Samsung Galaxy S21 Ultra</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">العطل المبلغ عنه:</span>
+                            <span id="resIssue" class="text-xs text-slate-300">فك حماية FRP وتحديث النظام</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-900">
+                            <span class="text-xs text-slate-400">الحالة الحالية:</span>
+                            <span id="resStatus" class="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">قيد الصيانة (سوفت وير)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Demo Devices List -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>أمثلة لأجهزة قيد العمل حالياً</span>
+                    <span class="text-[10px] text-amber-400 font-normal">تحديث مباشر</span>
+                </h4>
+                <div class="space-y-2">
+                    <div class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
+                                <i class="fa-brands fa-apple"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-white block">iPhone 13 Pro</span>
+                                <span class="text-[10px] text-slate-400">تغيير شاشة أصلية</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-md font-semibold">جاهز للاستلام</span>
+                    </div>
+                    <div class="bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-mobile"></i>
+                            </div>
+                            <div>
+                                <span class="font-bold text-white block">Redmi Note 11</span>
+                                <span class="text-[10px] text-slate-400">تخطي حساب جوجل FRP</span>
+                            </div>
+                        </div>
+                        <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-md font-semibold">قيد التشخيص</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Services & Repair (Hardware & Software) -->
+        <div id="tab-services" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white">خدمات السوفت وير والهارد وير</h3>
+                <span class="text-xs text-amber-400 font-semibold">ضمان جودة الصيانة</span>
+            </div>
+
+            <div class="space-y-3">
+                <!-- Service 1 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-unlock-keyhole"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">فك شفرات وإزالة حماية FRP</h4>
+                            <p class="text-[11px] text-slate-400">سامسونج، شاومي، هواوي، آيفون بدقة عالية</p>
+                        </div>
+                    </div>
+                    <button onclick="requestService('فك شفرات وحماية FRP')" class="text-[11px] font-bold bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-slate-950 px-3 py-2 rounded-xl border border-amber-500/20 transition">
+                        طلب خدمة
+                    </button>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-screwdriver"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">صيانة هاردوير متقدمة</h4>
+                            <p class="text-[11px] text-slate-400">تغيير شاشات، بطاريات، إصلاح آيسيهات الباور والشحن</p>
+                        </div>
+                    </div>
+                    <button onclick="requestService('صيانة هاردوير متقدمة')" class="text-[11px] font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-slate-950 px-3 py-2 rounded-xl border border-blue-500/20 transition">
+                        طلب خدمة
+                    </button>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">تحديث وتفليش الأنظمة (Firmware)</h4>
+                            <p class="text-[11px] text-slate-400">حل مشاكل التعليق على الشعار، السوفت الميت</p>
+                        </div>
+                    </div>
+                    <button onclick="requestService('تحديث وتفليش الأنظمة')" class="text-[11px] font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 px-3 py-2 rounded-xl border border-emerald-500/20 transition">
+                        طلب خدمة
+                    </button>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-laptop-code"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">إصلاح ملفات SysCfg & Baseband</h4>
+                            <p class="text-[11px] text-slate-400">حل مشاكل الشبكة وفقدان البيانات والـ IMEI</p>
+                        </div>
+                    </div>
+                    <button onclick="requestService('إصلاح SysCfg & Baseband')" class="text-[11px] font-bold bg-purple-500/10 text-purple-400 hover:bg-purple-500 hover:text-slate-950 px-3 py-2 rounded-xl border border-purple-500/20 transition">
+                        طلب خدمة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Software Tools & Activations -->
+        <div id="tab-activations" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white">التفعيلات وحسابات السوفت وير</h3>
+                <span class="text-xs text-amber-400 font-semibold">تفعيل فوري</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Tool 1 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold">متوفر</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">UnlockTool</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">تفعيل رسمي وسنوي لأقوى أداة صيانة</p>
+                    </div>
+                    <button onclick="buyActivation('UnlockTool')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-xl text-xs transition shadow-md shadow-amber-500/10">
+                        طلب التفعيل
+                    </button>
+                </div>
+
+                <!-- Tool 2 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold">متوفر</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">EFT Pro Tool</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">تفعيل أداة المحترفين لإزالة الحمايات</p>
+                    </div>
+                    <button onclick="buyActivation('EFT Pro Tool')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-xs transition shadow-md shadow-blue-600/10">
+                        طلب التفعيل
+                    </button>
+                </div>
+
+                <!-- Tool 3 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold">متوفر</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">JCID Activations</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">تفعيلات صيانة شاشات وبرمجة آيفون</p>
+                    </div>
+                    <button onclick="buyActivation('JCID Activations')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition shadow-md shadow-emerald-600/10">
+                        طلب التفعيل
+                    </button>
+                </div>
+
+                <!-- Tool 4 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold">متوفر</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-white">Chimera Tool</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">تراخيص سامسونج وهواوي وأبل</p>
+                    </div>
+                    <button onclick="buyActivation('Chimera Tool')" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-xs transition shadow-md shadow-purple-600/10">
+                        طلب التفعيل
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Contact & Location -->
+        <div id="tab-contact" class="hidden space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">عنوان المركز في أوباري</h3>
+                        <p class="text-[11px] text-slate-400">أوباري، الشارع الرئيسي - بجوار السوق التجاري، ليبيا</p>
+                    </div>
+                </div>
+
+                <div class="p-3.5 bg-slate-950/80 border border-slate-800 rounded-2xl space-y-2 text-xs text-slate-300">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">أوقات العمل:</span>
+                        <span class="font-bold text-white">السبت إلى الخميس (9:00 صباحاً - 9:00 مساءً)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">الخدمة السريعة:</span>
+                        <span class="font-bold text-emerald-400">متاحة داخل المركز</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <a href="tel:0910000000" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 rounded-2xl text-xs transition flex items-center justify-center gap-2 border border-slate-700">
+                        <i class="fa-solid fa-phone text-amber-400"></i>
+                        اتصال هاتفي مباشر بالمركز
+                    </a>
+                    <a href="https://wa.me/" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20">
+                        <i class="fa-brands fa-whatsapp text-base"></i>
+                        التواصل عبر واتساب الأسطورة سوفت
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </main>
-  </body>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-[11px] text-slate-500 mt-auto">
+        تطبيق الأسطورة سوفت للصيانة والبرمجيات &copy; 2026 - أوباري، ليبيا
+    </footer>
+
+    <!-- Interactive JavaScript Logic -->
+    <script>
+        // Custom Toast Notification Function (replaces alert)
+        function showToast(title, msg, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastTitle.innerText = title;
+            toastMsg.innerText = msg;
+
+            if(isSuccess) {
+                toastIcon.className = 'w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold';
+                toastIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                toastIcon.className = 'w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold';
+                toastIcon.innerHTML = '<i class="fa-solid fa-info"></i>';
+            }
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['track', 'services', 'activations', 'contact'];
+            
+            tabs.forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                const btn = document.getElementById('btn-' + t);
+                btn.className = 'py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-slate-400 hover:text-white bg-transparent shadow-none';
+            });
+
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabName);
+            activeBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20';
+        }
+
+        // Search Device Status Simulation
+        function searchDeviceStatus() {
+            const phoneInput = document.getElementById('phoneNumberInput').value.trim();
+            const resultBox = document.getElementById('searchResult');
+
+            if(phoneInput === '') {
+                showToast('تنبيه هام', 'الرجاء إدخال رقم الهاتف للبحث عن الجهاز', false);
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            // Simulate searching or matching sample
+            resultBox.classList.remove('hidden');
+            if(phoneInput.endsWith('1') || phoneInput.length > 7) {
+                document.getElementById('resName').innerText = 'عميل الأسطورة (أوباري)';
+                document.getElementById('resDevice').innerText = 'Samsung Galaxy S21 Ultra';
+                document.getElementById('resIssue').innerText = 'تخطي حماية FRP وتحديث سوفت وير';
+                document.getElementById('resStatus').innerText = 'قيد الصيانة (سوفت وير)';
+                document.getElementById('resStatus').className = 'text-[11px] font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20';
+            } else {
+                document.getElementById('resName').innerText = 'عميل مميز';
+                document.getElementById('resDevice').innerText = 'iPhone 13 Pro Max';
+                document.getElementById('resIssue').innerText = 'تغيير شاشة أصلية وهاردوير';
+                document.getElementById('resStatus').innerText = 'جاهز للاستلام بالمركز';
+                document.getElementById('resStatus').className = 'text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            }
+
+            showToast('تم بنجاح', 'تم جلب حالة الجهاز من نظام مركز الأسطورة سوفت', true);
+        }
+
+        // Service Request Handler
+        function requestService(serviceName) {
+            showToast('طلب خدمة', 'تم إرسال طلبك لـ (' + serviceName + '). سيتم التواصل معك قريباً عبر فرع أوباري', true);
+        }
+
+        // Activation Request Handler
+        function buyActivation(toolName) {
+            showToast('طلب تفعيل أداة', 'تم اختيار ��فعيل (' + toolName + '). تواصل معنا لتأكيد الدفع والتفعيل الفوري', true);
+        }
+    </script>
+</body>
 </html>
